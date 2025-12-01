@@ -1,226 +1,273 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <ncurses.h>
-#include <locale.h>
-#include <ctype.h>
 #include <string.h>
+#include <ctype.h>
+#include <locale.h>
 #include "chess.h"
+
 
 
 void enable_utf8_locale(void)
 {
+  // use the environment's default locale
   setlocale(LC_ALL, "");
 }
 
+
+
+
+
+
 int is_empty(piece_t m[][8], int i, int j)
 {
-	return m[i][j].type == 0;  // empty = 0
+  return m[i][j].type == 0;  // empty = 0
 }
+
+
+
 
 void draw_pieces(int oy, int ox, piece_t m[][8])
 {
-  // Use FILLED (black-style) glyphs for BOTH sides
-  const char *p[] = { " ", "♟", "♜", "♝", "♞", "♛", "♚" };
+  const char *p[] = {" ", "♟", "♜", "♝", "♞", "♛", "♚"};
 
-	// in function init_color: 0 = black, 1 = orange
-
-  // Top side:black
   for(int i = 0; i < 8; i++)
-  {
-	  for(int j = 0; j < 8; j++)
-	  {
-		  /*
-		empty,  // position is empty - 0
-		pawn,  // pion - 1
-		rook,  // tura - 2
-		bishop,  //nebun - 3
-		knight,  // cal - 4
-		queen,  // 5
-		king  // 6
-		*/
-
-		if(!m[i][j].type)
+    {
+      for(int j = 0; j < 8; j++)
 		{
-			continue;  // empty
+		/*
+	    empty,  // position is empty - 0
+	    pawn,  // pion - 1
+	    rook,  // tura - 2
+	    bishop,  //nebun - 3
+	    knight,  // cal - 4
+	    queen,  // 5
+	    king  // 6
+		*/
+			if(!m[i][j].type)
+			{
+			// empty
+			continue;
+			}
+
+			put_piece(oy, ox, i, j, p[m[i][j].type], m[i][j].color);
 		}
-		
-        put_piece(oy, ox, i, j, p[m[i][j].type], m[i][j].color);
-		 
-	  }
-  }
+    }
 }
+
 
 
 
 int get_square_color(int row, int column)
 {
-  // Colors/pairs:
-  // 1,2  -> board squares (light/dark)
-  // 10   -> PURE_BLACK fg (top side)
-  // 11   -> ORANGE fg (bottom side)
-  // 21/22-> PURE_BLACK on light/dark square bg
-  // 23/24-> ORANGE     on light/dark square bg
-  
   // light square: the sum is even
   // dark square: the sum is odd
-  if(!((row + column) % 2))  // if (row + column) % 2 == 0
+  if(!((row + column) % 2))
     {
-      return 2;
+      return 2;  // light
     }
 
-  return 1;
+  return 1;  // dark
 }
+
+
+
 
 
 void init_colors(void)
 {
-  if(!has_colors())
+  // check whether terminal supports colors
+  if(!(has_colors()))
     {
       return;
     }
-  
+
   start_color();
   use_default_colors();
-  
+
   // board squares
-  init_pair(1, COLOR_WHITE, COLOR_BLUE);
-  init_pair(2, COLOR_WHITE, COLOR_WHITE);  // dark (your style)
-  
-  // piece foregounds
+  init_pair(1, -1, COLOR_BLACK);
+  init_pair(2, -1, COLOR_WHITE);
+
+  // pieces
   int BLACK = COLOR_BLUE;
-  int ORANGE = COLOR_RED;
-  
-  
-  init_pair(0, BLACK, -1);
-  init_pair(1, ORANGE,     -1);
-  init_pair(-1, NONE, -1);
-  
-  // read board BGs and build composite pairs
+  int RED = COLOR_RED;
+
+  init_pair(3, RED, -1);
+  init_pair(4, BLACK, -1);
+  init_pair(5, NONE, -1);
+
   short tmp_fg, bg_light, bg_dark;
-  pair_content(1, &tmp_fg, &bg_light);
-  pair_content(2, &tmp_fg, &bg_dark);
-  
-  init_pair(21, BLACK, bg_light);
-  init_pair(22, BLACK, bg_dark);
-  init_pair(23, ORANGE,     bg_light);
-  init_pair(24, ORANGE,     bg_dark);
+  pair_content(1, &tmp_fg, &bg_dark);
+  pair_content(2, &tmp_fg, &bg_light);
+
+  // (black / red) piece with (light / dark) bg
+  init_pair(6, BLACK, bg_light);
+  init_pair(7, BLACK, bg_dark);
+  init_pair(8, RED, bg_light);
+  init_pair(9, RED, bg_dark);
 }
+
+
+
 
 
 void determine_and_create_piece(piece_t m[][8], int i, int j)
 {
-	switch(j)
-	{
-		case 0:
-		case 7:
-		{
-			// tura
-			m[i][j].type = rook;
-			m[i][j].x = i;
-			m[i][j].y = j;
-			break;
-		}
-		case 1:
-		case 6:
-		{
-			// cal
-			m[i][j].type = knight;
-			m[i][j].x = i;
-			m[i][j].y = j;
-			break;
-		}
-		case 2:
-		case 5:
-		{
-			// nebun
-			m[i][j].type = bishop;
-			m[i][j].x = i;
-			m[i][j].y = j;
-			break;
-		}
-		case 3:
-		{
-			m[i][j].type = queen;
-			m[i][j].x = i;
-			m[i][j].y = j;
-			break;
-		}
-		default:
-		{
-			m[i][j].type = king;
-			m[i][j].x = i;
-			m[i][j].y = j;
-			break;
-		}
-	}
+  switch(j)
+    {
+    case 0:
+    case 7:
+      {
+	// tura
+	m[i][j].type = rook;
+	m[i][j].x = i;
+	m[i][j].y = j;
+	break;
+      }
+    case 1:
+    case 6:
+      {
+	// cal
+	m[i][j].type = knight;
+	m[i][j].x = i;
+	m[i][j].y = j;
+	break;
+      }
+    case 2:
+    case 5:
+      {
+	// nebun
+	m[i][j].type = bishop;
+	m[i][j].x = i;
+	m[i][j].y = j;
+	break;
+      }
+    case 3:
+      {
+	// regina
+	m[i][j].type = queen;
+	m[i][j].x = i;
+	m[i][j].y = j;
+	break;
+      }
+    default:
+      {
+	// rege
+	m[i][j].type = king;
+	m[i][j].x = i;
+	m[i][j].y = j;
+	break;
+      }
+    }
 }
+
+
 
 
 
 void create_initial_pieces(piece_t m[][8])
 {
-	for(int row = 0; row < 8; row++)
+  for(int row = 0; row < 8; row++)
+    {
+      for(int col = 0; col < 8; col++)
 	{
-		for(int col = 0; col < 8; col++)
-		{
-			if(row == 0)
-			{
-				// create black rooks, bishops etc.
-				determine_and_create_piece(m, row, col);
-				m[row][col].color = BLACK;
-			}
-			else if(row == 1)
-			{
-				// create black pawns
-				m[row][col].type = pawn;
-				m[row][col].color = BLACK;
-				m[row][col].x = row;
-				m[row][col].y = col;
-			}
-			else if(row == 6)
-			{
-				// create orange pawns
-				m[row][col].type = pawn;
-				m[row][col].color = ORANGE;
-				m[row][col].x = row;
-				m[row][col].y = col;
-			}
-			else if(row == 7)
-			{
-				// create orange rooks, bishops etc.
-				determine_and_create_piece(m, row, col);
-				m[row][col].color = ORANGE;
-			}
-			else
-			{
-				// empty position
-				m[row][col].type = empty;
-				m[row][col].x = row;
-				m[row][col].y = col;
-				m[row][col].color = NONE;
-			}
-		}
+	  if(row == 0)
+	    {
+	      // create black rooks, bishops etc.
+	      determine_and_create_piece(m, row, col);
+	      m[row][col].color = BLACK;
+	    }
+	  else if(row == 1)
+	    {
+	      // create black pawns
+	      m[row][col].type = pawn;
+	      m[row][col].color = BLACK;
+	      m[row][col].x = row;
+	      m[row][col].y = col;
+	    }
+	  else if(row == 6)
+	    {
+	      // create orange pawns
+	      m[row][col].type = pawn;
+	      m[row][col].color = RED;
+	      m[row][col].x = row;
+	      m[row][col].y = col;
+	    }
+	  else if(row == 7)
+	    {
+	      // create orange rooks, bishops etc.
+	      determine_and_create_piece(m, row, col);
+	      m[row][col].color = RED;
+	    }
+	  else
+	    {
+	      // empty position
+	      m[row][col].type = empty;
+	      m[row][col].x = row;
+	      m[row][col].y = col;
+	      m[row][col].color = NONE;
+	    }
 	}
-	/*
-	piece_t aux = m[0][1];
-	m[0][1] = m[4][1];
-	m[4][1] = aux;
-	*/
+    }
 }
 
 
-void put_piece(int oy, int ox, int r, int c, const char *glyph, int color) {
-    int square = get_square_color(r, c);        // for the background
-    int use_pair = (color == 0)
-                 ? (square == 1 ? 21 : 22)
-                 : (square == 1 ? 23 : 24);
 
-    int y = oy + r * CELL_H + CELL_H / 2;
-    int x = ox + c * CELL_W + CELL_W / 2;
 
-    attron(COLOR_PAIR(use_pair) | A_BOLD);
-    mvaddstr(y, x, glyph);
-    attroff(COLOR_PAIR(use_pair) | A_BOLD);
+
+
+void put_piece(int oy, int ox, int r, int c, const char *glyph, int color)
+{
+  if(color == NONE)
+    {
+      return;
+    }
+  
+  int square = get_square_color(r, c);
+
+  // choose appropriate color-pair for the given piece
+  int use_pair;
+
+  /*
+    init_pair(6, BLACK, bg_light);
+    init_pair(7, BLACK, bg_dark);
+    init_pair(8, RED, bg_light);
+    init_pair(9, RED, bg_dark);
+  */
+
+  if(color == BLACK)
+    {
+      if(square == 1)  // dark bg
+	{
+	  use_pair = 7;
+	}
+      else
+	{
+	  use_pair = 6;
+	}
+    }
+  else  // RED piece
+    {
+      if(square == 1)
+	{
+	  use_pair = 9;
+	}
+      else
+	{
+	  use_pair = 8;
+	}
+    }
+
+  int y = oy + r * CELL_H + CELL_H / 2;
+  int x = ox + c * CELL_W + CELL_W / 2;
+
+  attron(COLOR_PAIR(use_pair) | A_BOLD);
+  mvaddstr(y, x, glyph);
+  attroff(COLOR_PAIR(use_pair) | A_BOLD);
 }
+
+
 
 
 
@@ -234,23 +281,23 @@ void draw_board(int oy, int ox)
   for(int r = 0; r < 8; r++)
     {
       for(int c = 0; c < 8; c++)
+	{
+	  int pair = get_square_color(r, c);
+	  if(hc)
+	    {
+	      attron(COLOR_PAIR(pair));
+	    }
+	  for(int dy = 0; dy < CELL_H; ++dy)
+	    {
+	      for(int dx = 0; dx < CELL_W; ++dx)
 		{
-			int pair = get_square_color(r, c);
-			if(hc)
-				{
-					attron(COLOR_PAIR(pair));
-				}
-			for(int dy = 0; dy < CELL_H; ++dy)
-				{
-					for(int dx = 0; dx < CELL_W; ++dx)
-						{
-							mvaddch(oy + r * CELL_H + dy, ox + c * CELL_W + dx, ' ');
-						}
-				}
-			if(hc)
-				{
-					attroff(COLOR_PAIR(pair));
-				}
+		  mvaddch(oy + r * CELL_H + dy, ox + c * CELL_W + dx, ' ');
+		}
+	    }
+	  if(hc)
+	    {
+	      attroff(COLOR_PAIR(pair));
+	    }
         }
     }
   
@@ -268,9 +315,10 @@ void draw_board(int oy, int ox)
       int ry = oy + r * CELL_H + CELL_H / 2;
       mvaddch(ry, ox - 2, rank);
     }
-  
-  //draw_starting_pieces(oy, ox);
 }
+
+
+
 
 
 int read_move(WINDOW *w, char *buf, int length)

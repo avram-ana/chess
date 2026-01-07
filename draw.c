@@ -119,6 +119,7 @@ void put_piece(int oy, int ox, int r, int c, const char *glyph, int color)
 }
 
 
+
 void draw_board(int oy, int ox)
 {
   init_colors();
@@ -157,13 +158,15 @@ void draw_board(int oy, int ox)
       mvaddch(oy - 1, cx, file);
     }
   
-  for(int r = 0; r < 8; ++r)
+  for(int r = 0; r < 8; r++)
     {
       char rank = '8' - r;
+      // char rank = '1' + r;
       int ry = oy + r * CELL_H + CELL_H / 2;
       mvaddch(ry, ox - 2, rank);
     }
 }
+
 
 
 void type_text_on_window(int oy, int ox, const char *text, int seconds)
@@ -200,7 +203,7 @@ char *read_from_window(WINDOW *w, int oy, int ox)
     wmove(w, oy, ox);
     wrefresh(w);
 
-    while (1)
+    while(1)
     {
         c = wgetch(w);
 
@@ -268,9 +271,8 @@ void draw_pieces(int oy, int ox, piece_t **m)
 			// empty
 			continue;
 			}
-
+	
 			put_piece(oy, ox, i, j, p[m[i][j].type], m[i][j].color);
 		}
     }
 }
-

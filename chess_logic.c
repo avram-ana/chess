@@ -5,6 +5,8 @@
 #include<regex.h>
 #include<ctype.h>
 #include<time.h>
+#include <ncurses.h>
+#include "draw.h"
 
 #define ROW 8
 #define COLUMN 8
@@ -235,7 +237,7 @@ unsigned int convert_character_to_column(char c)
 bool Validate_Semantically(const char *move)
 {
     regex_t regex;
-    const char *pattern = "^\\([a-hA-H][1-8][a-hA-H][1-8]\\|resign\\|draw\\)$";
+    const char *pattern = "^\\([a-hA-H][1-8][a-hA-H][1-8]\\|resign\\|draw\\|[YyNn]\\)$";
 
     int value = regcomp(&regex,pattern,0);
     if(value!=0)
@@ -243,6 +245,7 @@ bool Validate_Semantically(const char *move)
         perror("REGEX COMP FAILED");
         exit(-7);
       }
+
     value=regexec(&regex,move,0,NULL,0);
 
     regfree(&regex);
@@ -260,8 +263,8 @@ bool Validate_Piece_Logic(Element_T* Matrix,const char *move)
     unsigned int row_start=0;
     unsigned int row_end=0;
     sscanf(move,"%*c%d%*c%d",&row_start,&row_end);
-    row_start--;
-    row_end--;   
+    row_start = 8 - row_start;
+    row_end = 8 - row_end;   
     unsigned int pozition_start=row_start*ROW+column_start;
     unsigned int pozition_end=row_end*ROW+column_end;
 
@@ -831,8 +834,8 @@ Game_T*Apply_Move_Matrix(Game_T*Game,const char* move)
     unsigned int row_start;
     unsigned int row_end;
     sscanf(move,"%*c%d%*c%d",&row_start,&row_end);
-    row_start--;
-    row_end--;   
+    row_start = 8 - row_start;
+    row_end = 8 - row_end;   
     unsigned int pozition_start=row_start*ROW+column_start;
     unsigned int pozition_end=row_end*ROW+column_end;
 
@@ -1245,12 +1248,14 @@ bool Check_Moves_Available_White(Game_T*Game)
   Element_T *Matrix_Temp=malloc(sizeof(Element_T)*ROW*COLUMN);
   if(Matrix_Temp==NULL)
     {
+      endwin();
       perror("TEMP MATRIX ALLOCATION FAILED");
       exit(-1);
     }
   unsigned int* available_positions_for_a_piece=malloc(sizeof(unsigned int)*ROW*COLUMN);
   if(available_positions_for_a_piece==NULL)
     {
+      endwin();
       perror("AVAILABLE POSTION VECTOR ALLOCATION FAILED");
       exit(-1);
     }
@@ -1307,12 +1312,14 @@ bool Check_Moves_Available_Black(Game_T*Game)
   Element_T *Matrix_Temp=malloc(sizeof(Element_T)*ROW*COLUMN);
   if(Matrix_Temp==NULL)
     {
+      endwin();
       perror("TEMP MATRIX ALLOCATION FAILED");
       exit(-1);
     }
   unsigned int* available_positions_for_a_piece=malloc(sizeof(unsigned int)*ROW*COLUMN);
   if(available_positions_for_a_piece==NULL)
     {
+      endwin();
       perror("AVAILABLE POSTION VECTOR ALLOCATION FAILED");
       exit(-1);
     }
@@ -1405,6 +1412,7 @@ bool Check_Sufficient_Material(Element_T *Matrix)
 
 void Print_Game_Result(Game_T *Game)
 {
+	/*
   printf("\n");
   if(Game->game_ended_in_draw==true)
      {
@@ -1427,7 +1435,91 @@ void Print_Game_Result(Game_T *Game)
             printf("%s won the game!",(Game->client2.username));
         }
      }
-  printf("\n");
+  printf("\n");*/
+  
+    clear();  // clear window
+  
+    // get coordinates:
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    const int W = 8 * CELL_W, H = 8 * CELL_H;
+    int oy = (rows - H) / 2; 
+    if(oy < 2)
+      {
+	  	oy = 2;
+	  }
+	
+    int ox = (cols - W) / 2;
+    if(ox < 4) 
+      {
+	  	ox = 4;
+	  }
+	  
+	const char *win_msg1[] = {
+				R"(     _    _ _     _ _                               _ )",
+				R"(    | |  | | |   (_) |                             | |)",
+				R"(    | |  | | |__  _| |_ ___  __      _____  _ __   | |)",
+				R"(    | |/\| | '_ \| | __/ _ \ \ \ /\ / / _ \| '_ \  | |)",
+				R"(    \  /\  / | | | | ||  __/  \ V  V / (_) | | | | |_|)",
+				R"(     \/  \/|_| |_|_|\__\___|   \_/\_/ \___/|_| |_| (_))"
+				};
+	
+	const char *win_msg2[] = {
+                R"(    ______ _            _                            _  )",
+				R"(    | ___ \ |          | |                          | | )",
+				R"(    | |_/ / | __ _  ___| | __ __      _____  _ __   | | )",
+				R"(    | ___ \ |/ _` |/ __| |/ / \ \ /\ / / _ \| '_ \  | | )",
+				R"(    | |_/ / | (_| | (__|   <   \ V  V / (_) | | | | |_| )",
+				R"(    \____/|_|\__,_|\___|_|\_\   \_/\_/ \___/|_| |_| (_) )"
+				};
+
+				
+	const char *draw[] = {
+				R"(     _____                                       _          _   _                     _                       )",
+				R"(    |  __ \                                     | |        | | (_)                   | |                      )",
+				R"(    | |  \/ __ _ _ __ ___   ___    ___ _ __   __| | ___  __| |  _ _ __     __ _    __| |_ __ __ ___      __   )",
+				R"(    | | __ / _` | '_ ` _ \ / _ \  / _ \ '_ \ / _` |/ _ \/ _` | | | '_ \   / _` |  / _` | '__/ _` \ \ /\ / /   )",
+				R"(    | |_\ \ (_| | | | | | |  __/ |  __/ | | | (_| |  __/ (_| | | | | | | | (_| | | (_| | | | (_| |\ V  V /  _ )",
+				R"(     \____/\__,_|_| |_| |_|\___|  \___|_| |_|\__,_|\___|\__,_| |_|_| |_|  \__,_|  \__,_|_|  \__,_| \_/\_/  (_))"
+				};
+	
+	int msg_lines, start_row;
+	if(Game->game_ended_in_white_won==true)
+	{
+		// white won
+		msg_lines = sizeof(win_msg1) / sizeof(win_msg1[0]);
+		start_row = (rows - msg_lines) / 2;	
+		for(int i = 0; i < msg_lines; i++)
+		{
+			mvprintw(start_row + i, (cols - strlen(win_msg1[i])) / 2, "%s", win_msg1[i]);
+		}
+	}
+	else if(Game->game_ended_in_draw != true)
+	{
+		// black (blue) won
+		msg_lines = sizeof(win_msg2) / sizeof(win_msg2[0]);
+		start_row = (rows - msg_lines) / 2;	
+		for(int i = 0; i < msg_lines; i++)
+		{
+			mvprintw(start_row + i, (cols - strlen(win_msg2[i])) / 2, "%s", win_msg2[i]);
+		}
+	}
+	else if(Game->game_ended_in_draw)
+	{
+		msg_lines = sizeof(draw) / sizeof(draw[0]);
+		start_row = (rows - msg_lines) / 2;	
+		for(int i = 0; i < msg_lines; i++)
+		{
+			mvprintw(start_row + i, (cols - strlen(draw[i])) / 2, "%s", draw[i]);
+		}
+	}
+	
+	refresh();
+	
+	mvprintw(44, 98, "%s", "Press any key to exit.");
+	
+	getch();
+	endwin();
 }
 
 bool Game_Move(Game_T *Game,Client client,const char* move)
@@ -1437,7 +1529,9 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
     //move must be in the form "^\\([a-hA-H][1-8][a-hA-H][1-8]\\|resign\\|draw\\)$"
     if(Validate_Semantically(move)==false)
       {
-        printf("Semantics\n");
+        type_text_on_window(48, 106, "Invalid move!", 1000);
+        napms(300);
+        mvprintw(48, 106, "%s", "             ");
         return false;
       }
     
@@ -1463,36 +1557,63 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
     unsigned int row_start=0;
     unsigned int row_end=0;
     sscanf(move,"%*c%d%*c%d",&row_start,&row_end);
-    row_start--;
-    row_end--;   
+    row_start = 8 - row_start;
+    row_end = 8 - row_end;   
     unsigned int pozition_start=row_start*ROW+column_start;
     unsigned int pozition_end=row_end*ROW+column_end;
 
 
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    const int W = 8 * CELL_W, H = 8 * CELL_H;
+    int oy = (rows - H) / 2; 
+    if(oy < 2)
+    {
+		oy = 2;
+	}
+	
+    int ox = (cols - W) / 2;
+    if(ox < 4) 
+    {
+		ox = 4;
+	}
+
     //Cant stall the game
     if(pozition_start==pozition_end)
       {
-        printf("Stall\n");
+        type_text_on_window(48, 106, "Can't stall game.", 500);
+        napms(300);
+        mvprintw(48, 106, "%s", "                 ");
         return false;
       }
 
     //Cant move an Empty Space
     if(Matrix[pozition_start].name==Empty)
       {
-        printf("Move Empty\n");
+        // printf("Move Empty\n");
+        type_text_on_window(48, 106, "That's an empty space. Can't move anything!", 1000);
+        napms(300);
+        mvprintw(48, 106, "%s", "                                          ");
         return false;
       }
     //cant capture your own piece
     if(Matrix[pozition_end].name!=Empty && Matrix[pozition_end].isWhite==Matrix[pozition_start].isWhite)
       {
-        printf("Own Piece Capture\n");
+        // printf("Own Piece Capture\n");
+        //mvprintw(oy + 20, ox, "%s", "Own Piece Capture!");
+        type_text_on_window(48, 106, "Can't capture your own piece, can you?", 1000);
+        napms(300);
+        mvprintw(48, 106, "%s", "                                      ");
         return false;
       }
     //You cant move the opponent`s piece
     if((client.isWhite && !Matrix[pozition_start].isWhite) || (!client.isWhite && Matrix[pozition_start].isWhite))
       {
-        printf("Move Oponents\n");
-         return false;
+        // printf("Move Oponents\n");
+        type_text_on_window(48, 106, "Leave your opponent's pieces alone!!!", 1000);
+        napms(300);
+        mvprintw(48, 106, "%s", "                                     ");
+        return false;
       }
 
 
@@ -1503,9 +1624,9 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
         unsigned int previous_column_end      =convert_character_to_column(tolower(Game->previous_move[2]));
         unsigned int previous_row_end         =0;
         sscanf(Game->previous_move,"%*c%*d%*c%d",&previous_row_end);
-        previous_row_end--;
+        previous_row_end = 8 - previous_row_end;
         unsigned int pozition_previous        =previous_row_end*ROW+previous_column_end;
-
+        
         if(Matrix[pozition_start].isWhite==true && row_start==previous_row_end && row_start==3 && abs(column_start-previous_column_end)==1 && column_end==previous_column_end && row_end==previous_row_end-1)
           {
              Game->Matrix[pozition_start].name=Empty;
@@ -1514,7 +1635,7 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
              Game->Matrix[pozition_previous].name=Empty;
              if(is_white_in_check(Game->Matrix)==true)
                {
-                  printf("Discovery Check\n");
+                  //printf("Discovery Check\n");
                   Game->Matrix[pozition_start].name=PAWN;
                   Game->Matrix[pozition_start].isWhite=true;
                   Game->Matrix[pozition_end+ROW].name=PAWN;
@@ -1531,7 +1652,7 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
              Game->Matrix[pozition_previous].name=Empty;
              if(is_black_in_check(Game->Matrix)==true)
                {
-                  printf("Discovery Check\n");
+                  // printf("Discovery Check\n");
                   Game->Matrix[pozition_start].name=PAWN;
                   Game->Matrix[pozition_start].isWhite=false;
                   Game->Matrix[pozition_end-ROW].name=PAWN;
@@ -1629,7 +1750,10 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
 
     if(Validate_Piece_Logic(Game->Matrix,move)==false)
       {
-        printf("Piece Logic");
+        // printf("Piece Logic");
+        type_text_on_window(48, 106, "Invalid move!", 1000);
+        napms(300);
+        mvprintw(48, 106, "%s", "             ");
         return false;
       }
 
@@ -1645,7 +1769,10 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
             //rollback ,king is still in check after move 
             Game->Matrix[row_start*ROW+column_start]=capturer;
             Game->Matrix[row_end*ROW+column_end]=to_be_captured;
-            printf("Still in Check\n");
+            // printf("Still in Check\n");
+            type_text_on_window(48, 106, "...still in check", 500);
+			napms(300);
+			mvprintw(48, 106, "%s", "                 ");
             return false;
           }
       }
@@ -1657,7 +1784,10 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
             //rollback ,king is still in check after move
             Game->Matrix[row_start*ROW+column_start]=capturer;
             Game->Matrix[row_end*ROW+column_end]=to_be_captured;
-            printf("Still in Check\n");
+            // printf("Still in Check\n");
+            type_text_on_window(48, 106, "...still in check", 500);
+			napms(300);
+			mvprintw(48, 106, "%s", "                 ");
             return false;
           }
       }
@@ -1669,7 +1799,7 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
             //after your move cant be in a discovery check
             Game->Matrix[row_start*ROW+column_start]=capturer;
             Game->Matrix[row_end*ROW+column_end]=to_be_captured;
-            printf("Discovery Check\n");
+            // printf("Discovery Check\n");
             return false;
             }
       }
@@ -1680,7 +1810,7 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
             //after your move cant be in a discovery check
             Game->Matrix[row_start*ROW+column_start]=capturer;
             Game->Matrix[row_end*ROW+column_end]=to_be_captured;
-            printf("Discovery Check\n");
+            // printf("Discovery Check\n");
             return false;
             }
       }

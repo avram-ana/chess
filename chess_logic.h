@@ -55,6 +55,7 @@ Game_T *Reinstate_Game(Game_T *Game);
 
 Game_T*Apply_Move_Matrix(Game_T*Game,const char* move);
 bool Game_Move(Game_T *Game,Client client,const char* move);
+unsigned int convert_character_to_column(char c);
 
 void print_Matrix(Element_T *Matrix);
 void print_Game(Game_T *Game);

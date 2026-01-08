@@ -19,10 +19,13 @@ The ncurses library has been used for the GUI.
      \__,_|_|  \__,_| \_/\_/   (_) |_| |_|
 ```
 
-###The header contains functions that manage the GUI:
+    The header contains functions that manage the graphical user interface.
+    This module is responsible for rendering the chessboard and pieces using ncurses, handling user input and displaying textual feedback.
+    
+    
   - __enable_utf8_locale__ : enables UTF-8 support so chess Unicode symbols render correctly in the terminal.
     
-  -__init_colors__ : initializes ncurses color pairs used for board squares and pieces.
+  - __init_colors__ : initializes ncurses color pairs used for board squares and pieces.
   - __draw_board__ : draws the chessboard grid starting at offset (oy, ox).
   - __draw_pieces__ : renders all chess pieces on the board based on the current matrix.
   - __get_square_color__ : determines the current square color.
@@ -42,6 +45,8 @@ The ncurses library has been used for the GUI.
                                                   __/ |                   
                                                  |___/                    
 ```
+    This header defines the core data structures and functions responsible for managing the internal state of the chess game.
+    It operates independently of the graphical interface and implements the core chess logic, including move validation and game state management.
 
   - __Initialize_Classic_Game_Matrix__ : creates and returns a standard chess starting board.
   - __Initialize_Classic_Game__ : allocates and initializes a full game state with players and board.
@@ -54,11 +59,11 @@ The ncurses library has been used for the GUI.
   - __Print_Game_Result__ : displays the final result when the game ends.
 
         How to play
-The game expects moves in the following format:
-The first two characters represent the starting square, and the last two characters represent the destination square.
-        Columns: a-h
-        Rows: 1–8
-Moves must be provided in coordinate notation, without separators.
-        _For example : a1a2 / b2b3_
+- The game expects moves in the following format:
+- The first two characters represent the starting square, and the last two characters represent the destination square.
+   - Columns: a-h
+   - Rows: 1–8
+- Moves must be provided in coordinate notation, without separators.
+   - _For example: a1a2 / b2h2_
 
 <img width="497" height="616" alt="image" src="https://github.com/user-attachments/assets/59e714d0-0830-4c49-863c-8f7e9727af67" />

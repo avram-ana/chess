@@ -21,8 +21,8 @@ void from_raul_to_ana(piece_t **ana, char *move)
 
     piece_t moving = ana[from_row][from_col];
 
-    // destination occupied? → capture
-    if (ana[to_row][to_col].type != empty)
+    // destination occupied => capture
+    if(ana[to_row][to_col].type != empty)
     {
         // overwrite the captured piece
         ana[to_row][to_col] = moving;
@@ -33,99 +33,10 @@ void from_raul_to_ana(piece_t **ana, char *move)
         ana[to_row][to_col] = moving;
     }
 
-    // clear origin square
+    // clear start tile
     ana[from_row][from_col].type = empty;
     ana[from_row][from_col].color = NONE;
 }
-
-/*
-piece_t **convert_raul_to_ana(Element_T m[])
-{
-  piece_t **new = (piece_t **)malloc(sizeof(piece_t *) * ROW);
-  if(!new)
-    {
-      perror("Error allocating matrix in convert_raul_to_ana()");
-      exit(EXIT_FAILURE);
-	}
-  
-  for(int i = 0; i < ROW; i++)
-    {
-      new[i] = (piece_t *)malloc(sizeof(piece_t) * COLS);
-      if(!new[i])
-	{
-	  perror("Error allocating m[i] in convert_raul_to_ana()");
-	  exit(EXIT_FAILURE);
-	}
-    }	
-  
-  // const char *p[] = {" ", "♟", "♜", "♝", "♞", "♛", "♚"};
-  for(int i = 0; i < ROW; i++)
-    {
-      for(int j = 0; j < COLS; j++)
-	{
-	  if((m[i * ROW + j].isWhite))
-	    {
-			new[i][j].color = RED;
-	    }
-	  else
-	    {
-	      new[i][j].color = BLACK;
-	    }
-	  
-	  new[i][j].x = i;
-	  new[i][j].y = j;
-	  
-	  switch(m[i * ROW + j].name)
-	    {
-		//empty,  // position is empty - 0
-		//pawn,  // pion - 1
-		//rook,  // tura - 2
-		//bishop,  //nebun - 3
-		//knight,  // cal - 4
-		//queen,  // 5
-		//king  // 6
-	      
-	    case PAWN:  // pion
-	      {
-		new[i][j].type = pawn;
-		break;
-	      }
-	    case ROOK:  // tura
-	      {
-		new[i][j].type = rook;
-		break;
-	      }
-	    case BISHOP:  // nebun
-	      {
-		new[i][j].type = bishop;
-		break;
-	      }
-	    case KNIGHT:  // cal
-	      {
-		new[i][j].type = knight;
-		break;
-	      }
-	    case QUEEN:
-	      {
-		new[i][j].type = queen;
-		break;
-	      }
-	    case KING:
-	      {
-		new[i][j].type = king;
-		break;
-	      }
-	    case Empty:
-	      {
-		new[i][j].color = NONE;
-		break;
-	      }
-	    }
-	}
-    }
-  
-  return new;
-}*/
 
 piece_t **convert_raul_to_ana(Element_T m[])
 {
@@ -150,19 +61,15 @@ piece_t **convert_raul_to_ana(Element_T m[])
     {
       for(int j = 0; j < COLS; j++)
       {
-        // --- THE FIX IS HERE ---
-        // We use a DIRECT mapping. 
-        // i = 0 (Screen Top) reads Logic Index 0 (Black Pieces).
-        // i = 7 (Screen Bottom) reads Logic Index 7 (White Pieces).
         int index = i * ROW + j;
 
         if((m[index].isWhite))
         {
-           new[i][j].color = BLACK; // Remember: BLACK constant = Blue (White pieces)
+           new[i][j].color = BLACK;
         }
         else
         {
-           new[i][j].color = RED;   // Remember: RED constant = Red (Black pieces)
+           new[i][j].color = RED;
         }
         
         new[i][j].x = i;
@@ -190,9 +97,9 @@ int main(void)
   enable_utf8_locale();
   
   initscr();
-  cbreak();               // get chars immediately
-  noecho();               // we will handle echoing in read_move
-  keypad(stdscr, TRUE);   // enable special keys on stdscr
+  cbreak();
+  noecho();
+  keypad(stdscr, TRUE);
   
   int rows, cols;
   getmaxyx(stdscr, rows, cols);
@@ -209,9 +116,8 @@ int main(void)
       ox = 4;
     }
   
-  
-  
   type_text_on_window(oy, ox, "Welcome to the Chess Game! :3", 2000);
+  
   /*
     type_text_on_window(oy + 1, ox, "Choose the Version you want to play:", 2000);
     type_text_on_window(oy + 2, ox, "Type '1' for Classic  |  Type '2' for Fisher Random (Chess 960)", 2000);
@@ -394,7 +300,7 @@ int main(void)
   
   free(Game->Matrix);
   free(Game);
-                   //break;
+            //break;
 			
 		/*
 		}

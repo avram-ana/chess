@@ -61,4 +61,4 @@ The first two characters represent the starting square, and the last two charact
 Moves must be provided in coordinate notation, without separators.
         For example : a1a2 / b2b3
 
-<img width="777" height="979" alt="image" src="https://github.com/user-attachments/assets/b829a0c8-4803-407a-9fa2-7e76068ed358" />
+<img width="555" height="757" alt="image" src="https://github.com/user-attachments/assets/b829a0c8-4803-407a-9fa2-7e76068ed358" />

@@ -1527,11 +1527,28 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
     Element_T *Matrix=Game->Matrix;
  
     //move must be in the form "^\\([a-hA-H][1-8][a-hA-H][1-8]\\|resign\\|draw\\)$"
+    
+    
+    int rows, cols;
+    getmaxyx(stdscr, rows, cols);
+    const int W = 8 * CELL_W, H = 8 * CELL_H;
+    int oy = (rows - H) / 2; 
+    if(oy < 2)
+    {
+		oy = 2;
+	}
+	
+    int ox = (cols - W) / 2;
+    if(ox < 4) 
+    {
+		ox = 4;
+	}
+    
     if(Validate_Semantically(move)==false)
       {
-        type_text_on_window(48, 106, "Invalid move!", 1000);
+        type_text_on_window(oy + 19, ox, "Invalid move!", 1000);
         napms(300);
-        mvprintw(48, 106, "%s", "             ");
+        mvprintw(oy + 19, ox, "%s", "             ");
         return false;
       }
     
@@ -1563,27 +1580,12 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
     unsigned int pozition_end=row_end*ROW+column_end;
 
 
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    const int W = 8 * CELL_W, H = 8 * CELL_H;
-    int oy = (rows - H) / 2; 
-    if(oy < 2)
-    {
-		oy = 2;
-	}
-	
-    int ox = (cols - W) / 2;
-    if(ox < 4) 
-    {
-		ox = 4;
-	}
-
     //Cant stall the game
     if(pozition_start==pozition_end)
       {
-        type_text_on_window(48, 106, "Can't stall game.", 500);
+        type_text_on_window(oy + 19, ox, "Can't stall game.", 500);
         napms(300);
-        mvprintw(48, 106, "%s", "                 ");
+        mvprintw(oy + 19, ox, "%s", "                 ");
         return false;
       }
 
@@ -1591,9 +1593,9 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
     if(Matrix[pozition_start].name==Empty)
       {
         // printf("Move Empty\n");
-        type_text_on_window(48, 106, "That's an empty space. Can't move anything!", 1000);
+        type_text_on_window(oy + 19, ox, "That's an empty space. Can't move anything!", 1000);
         napms(300);
-        mvprintw(48, 106, "%s", "                                          ");
+        mvprintw(oy + 19, ox, "%s", "                                           ");
         return false;
       }
     //cant capture your own piece
@@ -1601,18 +1603,18 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
       {
         // printf("Own Piece Capture\n");
         //mvprintw(oy + 20, ox, "%s", "Own Piece Capture!");
-        type_text_on_window(48, 106, "Can't capture your own piece, can you?", 1000);
+        type_text_on_window(oy + 19, ox, "Can't capture your own piece, can you?", 1000);
         napms(300);
-        mvprintw(48, 106, "%s", "                                      ");
+        mvprintw(oy + 19, ox, "%s", "                                          ");
         return false;
       }
     //You cant move the opponent`s piece
     if((client.isWhite && !Matrix[pozition_start].isWhite) || (!client.isWhite && Matrix[pozition_start].isWhite))
       {
         // printf("Move Oponents\n");
-        type_text_on_window(48, 106, "Leave your opponent's pieces alone!!!", 1000);
+        type_text_on_window(oy + 19, ox, "Leave your opponent's pieces alone!!!", 1000);
         napms(300);
-        mvprintw(48, 106, "%s", "                                     ");
+        mvprintw(oy + 19, ox, "%s", "                                        ");
         return false;
       }
 
@@ -1751,9 +1753,9 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
     if(Validate_Piece_Logic(Game->Matrix,move)==false)
       {
         // printf("Piece Logic");
-        type_text_on_window(48, 106, "Invalid move!", 1000);
+        type_text_on_window(oy + 19, ox, "Invalid move!", 1000);
         napms(300);
-        mvprintw(48, 106, "%s", "             ");
+        mvprintw(oy + 19, ox, "%s", "             ");
         return false;
       }
 
@@ -1770,9 +1772,9 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
             Game->Matrix[row_start*ROW+column_start]=capturer;
             Game->Matrix[row_end*ROW+column_end]=to_be_captured;
             // printf("Still in Check\n");
-            type_text_on_window(48, 106, "...still in check", 500);
+            type_text_on_window(oy + 19, ox, "...still in check", 500);
 			napms(300);
-			mvprintw(48, 106, "%s", "                 ");
+			mvprintw(oy + 19, ox, "%s", "                 ");
             return false;
           }
       }
@@ -1785,9 +1787,9 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
             Game->Matrix[row_start*ROW+column_start]=capturer;
             Game->Matrix[row_end*ROW+column_end]=to_be_captured;
             // printf("Still in Check\n");
-            type_text_on_window(48, 106, "...still in check", 500);
+            type_text_on_window(oy + 19, ox, "...still in check", 500);
 			napms(300);
-			mvprintw(48, 106, "%s", "                 ");
+			mvprintw(oy + 19, ox, "%s", "                 ");
             return false;
           }
       }

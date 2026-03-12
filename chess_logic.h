@@ -1,5 +1,5 @@
-#ifndef _CHESS_LOGIC_H
-#define _CHESS_LOGIC_H
+#ifndef CHESS_LOGIC_H
+#define CHESS_LOGIC_H
 
 #define ROW 8
 #define COLUMN 8
@@ -49,6 +49,8 @@ typedef struct
 
 }Game_T;
 
+
+
 Element_T *Initialize_Classic_Game_Matrix();
 Game_T *Initialize_Classic_Game();
 Game_T *Reinstate_Game(Game_T *Game);
@@ -62,3 +64,4 @@ void print_Game(Game_T *Game);
 void Print_Game_Result(Game_T *Game);
 
 #endif
+

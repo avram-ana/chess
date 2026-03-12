@@ -4,8 +4,8 @@
 #include <ncurses.h>
 #include <locale.h>
 #include <ctype.h>
-#include "draw.h"
-#include "chess_logic.h"
+#include "GUI.h"
+#include "chessLogic.h"
 
 #define MAX 512
 #define ROW 8
@@ -48,8 +48,8 @@ void init_colors(void)
   init_pair(2, -1, COLOR_WHITE);
 
   // pieces
-  int BLACK = COLOR_BLUE;
-  int RED = COLOR_RED;
+  int BLACK = COLOR_RED;
+  int RED = COLOR_BLUE;
 
   init_pair(3, RED, -1);
   init_pair(4, BLACK, -1);
@@ -59,7 +59,7 @@ void init_colors(void)
   pair_content(1, &tmp_fg, &bg_dark);
   pair_content(2, &tmp_fg, &bg_light);
 
-  // (black / red) piece with (light / dark) bg
+  // (black / blue) piece with (light / dark) bg
   init_pair(6, BLACK, bg_light);
   init_pair(7, BLACK, bg_dark);
   init_pair(8, RED, bg_light);

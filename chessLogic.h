@@ -1,5 +1,5 @@
-#ifndef CHESS_LOGIC_H
-#define CHESS_LOGIC_H
+#ifndef CHESSLOGIC_H
+#define CHESSLOGIC_H
 
 #define ROW 8
 #define COLUMN 8

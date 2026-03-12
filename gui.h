@@ -1,27 +1,29 @@
-#ifndef _DRAW_H_
-#define _DRAW_H_
+#ifndef GUI_H
+#define GUI_H
 
 // chess board dimensions
-static const int CELL_W = 4;
-static const int CELL_H = 2;
+#define CELL_W  4
+#define CELL_H  2
+#define ROW 8
+#define COL 8
 
 
 typedef enum color
 {
     RED = 3,
     BLACK = 4,
-    NONE = 5  // there is no piece there
+    NONE = 5  
 }color_t;
 
 typedef enum type
 {
-    empty,  // position is empty - 0
-    pawn,  // pion - 1
-    rook,  // tura - 2
-    bishop,  //nebun - 3
-    knight,  // cal - 4
-    queen,  // 5
-    king  // 6
+    empty,      
+    pawn,       
+    rook,       
+    bishop,     
+    knight,  
+    queen,  
+    king  
 }type_t;
 
 typedef struct piece
@@ -31,6 +33,7 @@ typedef struct piece
   int x;
   int y;
 }piece_t;
+
 
 
 void enable_utf8_locale(void);

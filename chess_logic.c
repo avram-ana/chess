@@ -5,8 +5,8 @@
 #include<regex.h>
 #include<ctype.h>
 #include<time.h>
-#include <ncurses.h>
-#include "draw.h"
+#include<ncurses.h>
+#include"GUI.h"
 
 #define ROW 8
 #define COLUMN 8
@@ -168,7 +168,7 @@ void print_Matrix(Element_T *Matrix)
         }
         printf("+\n");
 
-        printf("%d ",i+1); 
+        printf("%d ",ROW-i); 
 
         for(j=0;j<COLUMN;j++)
         {
@@ -1412,7 +1412,7 @@ bool Check_Sufficient_Material(Element_T *Matrix)
 
 void Print_Game_Result(Game_T *Game)
 {
-	/*
+	
   printf("\n");
   if(Game->game_ended_in_draw==true)
      {
@@ -1435,8 +1435,11 @@ void Print_Game_Result(Game_T *Game)
             printf("%s won the game!",(Game->client2.username));
         }
      }
-  printf("\n");*/
+  printf("\n");
   
+}
+void Print_Game_Result_WINDOW(Game_T *Game)
+{
     clear();  // clear window
   
     // get coordinates:
@@ -1521,34 +1524,14 @@ void Print_Game_Result(Game_T *Game)
 	getch();
 	endwin();
 }
-
 bool Game_Move(Game_T *Game,Client client,const char* move)
 {
     Element_T *Matrix=Game->Matrix;
  
     //move must be in the form "^\\([a-hA-H][1-8][a-hA-H][1-8]\\|resign\\|draw\\)$"
-    
-    
-    int rows, cols;
-    getmaxyx(stdscr, rows, cols);
-    const int W = 8 * CELL_W, H = 8 * CELL_H;
-    int oy = (rows - H) / 2; 
-    if(oy < 2)
-    {
-		oy = 2;
-	}
-	
-    int ox = (cols - W) / 2;
-    if(ox < 4) 
-    {
-		ox = 4;
-	}
-    
     if(Validate_Semantically(move)==false)
       {
-        type_text_on_window(oy + 19, ox, "Invalid move!", 1000);
-        napms(300);
-        mvprintw(oy + 19, ox, "%s", "             ");
+        printf("Invalid Move\n");
         return false;
       }
     
@@ -1579,42 +1562,29 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
     unsigned int pozition_start=row_start*ROW+column_start;
     unsigned int pozition_end=row_end*ROW+column_end;
 
-
     //Cant stall the game
     if(pozition_start==pozition_end)
       {
-        type_text_on_window(oy + 19, ox, "Can't stall game.", 500);
-        napms(300);
-        mvprintw(oy + 19, ox, "%s", "                 ");
+        printf("Cant stall game\n");
         return false;
       }
 
     //Cant move an Empty Space
     if(Matrix[pozition_start].name==Empty)
       {
-        // printf("Move Empty\n");
-        type_text_on_window(oy + 19, ox, "That's an empty space. Can't move anything!", 1000);
-        napms(300);
-        mvprintw(oy + 19, ox, "%s", "                                           ");
+        printf("That's an empty space. Can't move anything!\n");
         return false;
       }
     //cant capture your own piece
     if(Matrix[pozition_end].name!=Empty && Matrix[pozition_end].isWhite==Matrix[pozition_start].isWhite)
       {
-        // printf("Own Piece Capture\n");
-        //mvprintw(oy + 20, ox, "%s", "Own Piece Capture!");
-        type_text_on_window(oy + 19, ox, "Can't capture your own piece, can you?", 1000);
-        napms(300);
-        mvprintw(oy + 19, ox, "%s", "                                          ");
+        printf("Own Piece Capture\n");
         return false;
       }
     //You cant move the opponent`s piece
     if((client.isWhite && !Matrix[pozition_start].isWhite) || (!client.isWhite && Matrix[pozition_start].isWhite))
       {
-        // printf("Move Oponents\n");
-        type_text_on_window(oy + 19, ox, "Leave your opponent's pieces alone!!!", 1000);
-        napms(300);
-        mvprintw(oy + 19, ox, "%s", "                                        ");
+        printf("Leave your opponent's pieces alone!!!\n");
         return false;
       }
 
@@ -1637,7 +1607,7 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
              Game->Matrix[pozition_previous].name=Empty;
              if(is_white_in_check(Game->Matrix)==true)
                {
-                  //printf("Discovery Check\n");
+                  printf("Discovery Check\n");
                   Game->Matrix[pozition_start].name=PAWN;
                   Game->Matrix[pozition_start].isWhite=true;
                   Game->Matrix[pozition_end+ROW].name=PAWN;
@@ -1654,7 +1624,7 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
              Game->Matrix[pozition_previous].name=Empty;
              if(is_black_in_check(Game->Matrix)==true)
                {
-                  // printf("Discovery Check\n");
+                  printf("Discovery Check\n");
                   Game->Matrix[pozition_start].name=PAWN;
                   Game->Matrix[pozition_start].isWhite=false;
                   Game->Matrix[pozition_end-ROW].name=PAWN;
@@ -1688,32 +1658,63 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
 
     if(Matrix[pozition_start].name==KING)
       { 
-          //rocada mica negru
-         if(Matrix[pozition_start].isWhite==false && Game->has_white_king_moved==false && (row_end==0 && column_end==6)
+           //rocada mica negru
+         if(  Matrix[pozition_start].isWhite==false && Game->has_black_king_moved==false && (row_end==0 && column_end==6)
            && Matrix[row_start*ROW+column_start+1].name==Empty && Matrix[row_start*ROW+column_start+2].name==Empty
-           && Matrix[row_start*ROW+column_start+3].name==ROOK  && Game->is_white_king_checked==false)
+           && Matrix[row_start*ROW+column_start+3].name==ROOK  &&  Matrix[row_start*ROW+column_start+3].isWhite==false 
+           && Game->is_black_king_checked==false)
            {
              Game->Matrix[pozition_start].name=Empty;
-             Game->Matrix[pozition_end].isWhite=true; 
+             Game->Matrix[pozition_end].isWhite=false; 
              Game->Matrix[pozition_end].name=KING;
              Game->Matrix[row_start*ROW+column_start+1].name=ROOK;
-             Game->Matrix[row_start*ROW+column_start+1].isWhite=true;
+             Game->Matrix[row_start*ROW+column_start+1].isWhite=false;
              Game->Matrix[row_start*ROW+column_start+3].name=Empty;
+
+             if(Game->is_black_king_checked==true)
+              { 
+              //rollback ,king is in check after move 
+              Game->Matrix[pozition_start].name=KING;
+              Game->Matrix[pozition_start].isWhite=false;
+              Game->Matrix[row_start*ROW+column_start+3].name=ROOK;
+              Game->Matrix[row_start*ROW+column_start+3].isWhite=false;
+              Game->Matrix[row_start*ROW+column_start+1].name=Empty; 
+              Game->Matrix[row_start*ROW+column_start+2].name=Empty;
+              printf("Still in Check\n");
+              return false;
+              }
+
              Game->has_black_king_moved=true;
              Game->is_white_king_checked=is_white_in_check(Game->Matrix);
              return true;
 
            }
           //rocada mare negru
-          if(Matrix[pozition_start].isWhite==false && Game->has_black_king_moved==false && (row_end==0 && column_end==2)
-           && Matrix[0*ROW+0].name==ROOK && Matrix[0*ROW+1].name==Empty && Matrix[0*ROW+2].name==Empty && Matrix[0*ROW+3].name==Empty && Game->is_white_king_checked==false)
+          if( Matrix[pozition_start].isWhite==false && Game->has_black_king_moved==false && (row_end==0 && column_end==2)
+           && Matrix[0*ROW+0].name==ROOK && Matrix[0*ROW+0].isWhite==false && Matrix[0*ROW+1].name==Empty 
+           && Matrix[0*ROW+2].name==Empty && Matrix[0*ROW+3].name==Empty   && Game->is_black_king_checked==false)
            {
              Game->Matrix[pozition_start].name=Empty;
-             Game->Matrix[pozition_end].isWhite=true; 
+             Game->Matrix[pozition_end].isWhite=false; 
              Game->Matrix[pozition_end].name=KING;
              Game->Matrix[0*ROW+3].name=ROOK;
-             Game->Matrix[0*ROW+3].isWhite=true;
+             Game->Matrix[0*ROW+3].isWhite=false;
              Game->Matrix[0*ROW+0].name=Empty;
+
+             if(Game->is_black_king_checked==true)
+              { 
+              //rollback ,king is in check after move 
+              Game->Matrix[pozition_start].name=KING;
+              Game->Matrix[pozition_start].isWhite=false;
+              Game->Matrix[0*ROW+0].name=ROOK;
+              Game->Matrix[0*ROW+0].isWhite=false;
+              Game->Matrix[0*ROW+1].name=Empty;
+              Game->Matrix[0*ROW+2].name=Empty;
+              Game->Matrix[0*ROW+3].name=Empty;
+              printf("Still in Check\n");
+              return false;
+              } 
+
              Game->has_black_king_moved=true;
              Game->is_white_king_checked=is_white_in_check(Game->Matrix);
              return true;
@@ -1721,41 +1722,68 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
           //rocada mica alb
           if(Matrix[pozition_start].isWhite==true && Game->has_white_king_moved==false && (row_end==7 && column_end==6)
            && Matrix[7*ROW+column_start+1].name==Empty && Matrix[7*ROW+column_start+2].name==Empty
-           && Matrix[7*ROW+column_start+3].name==ROOK && Game->is_black_king_checked==false)
+           && Matrix[7*ROW+column_start+3].name==ROOK && Game->is_white_king_checked==false)
            {
              Game->Matrix[pozition_start].name=Empty;
-             Game->Matrix[pozition_end].isWhite=false; 
+             Game->Matrix[pozition_end].isWhite=true; 
              Game->Matrix[pozition_end].name=KING;
              Game->Matrix[7*ROW+column_start+1].name=ROOK;
-             Game->Matrix[7*ROW+column_start+1].isWhite=false;
+             Game->Matrix[7*ROW+column_start+1].isWhite=true;
              Game->Matrix[7*ROW+column_start+3].name=Empty;
+
+             if(Game->is_white_king_checked==true)
+              { 
+              //rollback ,king is in check after move 
+              Game->Matrix[pozition_start].name=KING;
+              Game->Matrix[pozition_start].isWhite=true;
+              Game->Matrix[7*ROW+column_start+3].name=ROOK;
+              Game->Matrix[7*ROW+column_start+3].isWhite=true;
+              Game->Matrix[7*ROW+column_start+1].name=Empty; 
+              Game->Matrix[7*ROW+column_start+2].name=Empty;
+              printf("Still in Check\n");
+              return false;
+              }
+
              Game->has_white_king_moved=true;
-             Game->is_white_king_checked=is_white_in_check(Game->Matrix);
+             Game->is_black_king_checked=is_black_in_check(Game->Matrix);
              return true;
 
            }
           //rocada mare alb
           if(Matrix[pozition_start].isWhite==true && Game->has_white_king_moved==false && (row_end==7 && column_end==2)
-           && Matrix[7*ROW+0].name==ROOK && Matrix[7*ROW+1].name==Empty && Matrix[7*ROW+2].name==Empty && Matrix[7*ROW+3].name==Empty && Game->is_black_king_checked==false)
+           && Matrix[7*ROW+0].name==ROOK   && Matrix[7*ROW+0].isWhite==true && Matrix[7*ROW+1].name==Empty && Matrix[7*ROW+2].name==Empty 
+           && Matrix[7*ROW+3].name==Empty  && Game->is_black_king_checked==false)
            {
              Game->Matrix[pozition_start].name=Empty;
-             Game->Matrix[pozition_end].isWhite=false; 
+             Game->Matrix[pozition_end].isWhite=true; 
              Game->Matrix[pozition_end].name=KING;
              Game->Matrix[7*ROW+3].name=ROOK;
-             Game->Matrix[7*ROW+3].isWhite=false;
+             Game->Matrix[7*ROW+3].isWhite=true;
              Game->Matrix[7*ROW+0].name=Empty;
+
+             if(Game->is_white_king_checked==true)
+              { 
+              //rollback ,king is in check after move 
+              Game->Matrix[pozition_start].name=KING;
+              Game->Matrix[pozition_start].isWhite=true;
+              Game->Matrix[7*ROW+0].name=ROOK;
+              Game->Matrix[7*ROW+0].isWhite=true;
+              Game->Matrix[7*ROW+1].name=Empty;
+              Game->Matrix[7*ROW+2].name=Empty;
+              Game->Matrix[7*ROW+3].name=Empty;
+              printf("Still in Check\n");
+              return false;
+              } 
+
              Game->has_white_king_moved=true;
-             Game->is_white_king_checked=is_white_in_check(Game->Matrix);
+             Game->is_black_king_checked=is_black_in_check(Game->Matrix);
              return true;
            }
       }
 
     if(Validate_Piece_Logic(Game->Matrix,move)==false)
       {
-        // printf("Piece Logic");
-        type_text_on_window(oy + 19, ox, "Invalid move!", 1000);
-        napms(300);
-        mvprintw(oy + 19, ox, "%s", "             ");
+        printf("Piece Logic");
         return false;
       }
 
@@ -1771,10 +1799,7 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
             //rollback ,king is still in check after move 
             Game->Matrix[row_start*ROW+column_start]=capturer;
             Game->Matrix[row_end*ROW+column_end]=to_be_captured;
-            // printf("Still in Check\n");
-            type_text_on_window(oy + 19, ox, "...still in check", 500);
-			napms(300);
-			mvprintw(oy + 19, ox, "%s", "                 ");
+             printf("Still in Check\n");
             return false;
           }
       }
@@ -1786,10 +1811,7 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
             //rollback ,king is still in check after move
             Game->Matrix[row_start*ROW+column_start]=capturer;
             Game->Matrix[row_end*ROW+column_end]=to_be_captured;
-            // printf("Still in Check\n");
-            type_text_on_window(oy + 19, ox, "...still in check", 500);
-			napms(300);
-			mvprintw(oy + 19, ox, "%s", "                 ");
+            printf("Still in Check\n");
             return false;
           }
       }
@@ -1801,7 +1823,7 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
             //after your move cant be in a discovery check
             Game->Matrix[row_start*ROW+column_start]=capturer;
             Game->Matrix[row_end*ROW+column_end]=to_be_captured;
-            // printf("Discovery Check\n");
+            printf("Discovery Check\n");
             return false;
             }
       }
@@ -1812,15 +1834,15 @@ bool Game_Move(Game_T *Game,Client client,const char* move)
             //after your move cant be in a discovery check
             Game->Matrix[row_start*ROW+column_start]=capturer;
             Game->Matrix[row_end*ROW+column_end]=to_be_captured;
-            // printf("Discovery Check\n");
+            printf("Discovery Check\n");
             return false;
             }
       }
       
     //king can't castle if he was moved
-    if(Matrix[pozition_start].name==KING)
+    if(Game->Matrix[pozition_start].name==KING)
     {
-      if(Matrix[pozition_start].isWhite==true)
+      if(Game->Matrix[pozition_start].isWhite==true)
         {
           Game->has_white_king_moved=true;
         }
@@ -1940,7 +1962,6 @@ Game_T *Reinstate_Game(Game_T *Game)
 
 void print_Game(Game_T *Game)
 {
-  //TODO Implement Ana's API
    printf("                  %s-Black       \n",Game->client2.username);
    print_Matrix(Game->Matrix);
    printf("                  %s-White       \n",Game->client1.username);

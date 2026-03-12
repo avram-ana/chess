@@ -1,77 +1,88 @@
 ```
- _______  __   __  _______  _______  _______    _______  _______  __   __  _______ 
-|       ||  | |  ||       ||       ||       |  |       ||   _   ||  |_|  ||       |
-|       ||  |_|  ||    ___||  _____||  _____|  |    ___||  |_|  ||       ||    ___|
-|       ||       ||   |___ | |_____ | |_____   |   | __ |       ||       ||   |___ 
-|      _||       ||    ___||_____  ||_____  |  |   ||  ||       ||       ||    ___|
-|     |_ |   _   ||   |___  _____| | _____| |  |   |_| ||   _   || ||_|| ||   |___ 
-|_______||__| |__||_______||_______||_______|  |_______||__| |__||_|   |_||_______|
+    _________ .__                             ________                       
+    \_   ___ \|  |__   ____   ______ ______  /  _____/_____    _____   ____  
+    /    \  \/|  |  \_/ __ \ /  ___//  ___/ /   \  ___\__  \  /     \_/ __ \ 
+    \     \___|   Y  \  ___/ \___ \ \___ \  \    \_\  \/ __ \|  Y Y  \  ___/ 
+     \______  /___|  /\___  >____  >____  >  \______  (____  /__|_|  /\___  >
+            \/     \/     \/     \/     \/          \/     \/      \/     \/ 
 ```
 
-This C program implements a full chess game with move validation, game state tracking, and terminal-based graphics.
-The ncurses library is used to render the board and pieces and handle interactive input.
+ This project implements a terminal-based multiplayer chess game written in C, featuring move validation, 
+game state tracking, and real-time gameplay over TCP sockets. The ncurses library is used to render the 
+chessboard, the pieces and to handle interactive input.
+
+## ♟️ Features
+- Terminal-based chess interface using **ncurses**
+- Multiplayer gameplay using **TCP sockets**
+- **Client–server architecture**
+- **POSIX threads** for concurrent game sessions
+- Unicode chess pieces with **UTF-8 rendering**
+- Move validation and game state management
+- Support for **draw requests**, **rematch**, and **quit**
 
 ```
-         _                          _     
-        | |                        | |    
-      __| |_ __ __ ___      __     | |__  
-     / _` | '__/ _` \ \ /\ / /     | '_ \ 
-    | (_| | | | (_| |\ V  V /   _  | | | |
-     \__,_|_|  \__,_| \_/\_/   (_) |_| |_|
+     _____ _                      _                 _      
+    /  __ \ |                    | |               (_)     
+    | /  \/ |__   ___  ___ ___   | |     ___   __ _ _  ___ 
+    | |   | '_ \ / _ \/ __/ __|  | |    / _ \ / _` | |/ __|
+    | \__/\ | | |  __/\__ \__ \  | |___| (_) | (_| | | (__ 
+     \____/_| |_|\___||___/___/  \_____/\___/ \__, |_|\___|
+                                               __/ |       
+                                              |___/        
 ```
-
- The header contains functions that manage the graphical user interface.
- This module is responsible for rendering the chessboard and pieces using ncurses, 
- handling user input and displaying textual feedback.
-
-    
-  - __enable_utf8_locale__ : enables UTF-8 support so chess Unicode symbols render correctly in the terminal.
-    
-  - __init_colors__ : initializes ncurses color pairs used for board squares and pieces.
-  - __draw_board__ : draws the chessboard grid starting at offset (oy, ox).
-  - __draw_pieces__ : renders all chess pieces on the board based on the current matrix.
-  - __get_square_color__ : determines the current square color.
-  - __put_piece__ : draws a single piece glyph at board position (r, c) with the appropriate color pair.
-    
-  - __type_text_on_window__ : displays animated text (typing effect) at a given position for a given duration.
-  - __show_what_is_being_typed__ : prints characters as the user types them in a window.
-  - __read_from_window__ : reads a full string input from the user at a specified window position (backspace key is also being handled).
-
-```
-          _                              _             _            _
-         | |                            | |           (_)          | |    
-      ___| |__   ___  ___ ___           | | ___   __ _ _  ___      | |__  
-     / __| '_ \ / _ \/ __/ __|          | |/ _ \ / _` | |/ __|     | '_ \ 
-    | (__| | | |  __/\__ \__ \  ______  | | (_) | (_| | | (__   _  | | | |
-     \___|_| |_|\___||___/___/ |______/ |_|\___/ \__, |_|\___| (_) |_| |_|
-                                                  __/ |                   
-                                                 |___/                    
-```
- This header defines the core data structures and functions responsible for managing 
+  The code defines the core data structures and functions responsible for managing 
  the internal state of the chess game. It operates independently of the graphical interface 
- and implements the core chess logic, including move validation and game state management.
-
-  - __Initialize_Classic_Game_Matrix__ : creates and returns a standard chess starting board.
-  - __Initialize_Classic_Game__ : allocates and initializes a full game state with players and board.
-  - __Reinstate_Game__ : resets the game to an initial chess board.
-    
-  - __Apply_Move_Matrix__ : applies a valid move to the board matrix.
-  - __Game_Move__ : validates and executes a player move, updating game state accordingly.
-    
-  - __print_Matrix__ : prints the current matrix in the terminal (used for debugging purposes)
-  - __Print_Game_Result__ : displays the final result when the game ends.
-
-        How to play
-- The game expects moves in the following format:
-- The first two characters represent the starting square, and the last two characters represent the destination square.
-   - Columns: a-h
-   - Rows: 1–8
-- Moves must be provided in coordinate notation, without separators.
-   - _For example: a1a2 / b2h2_
-- For compiling the code:
+ and implements the core chess logic, including move validation and game state management.⚙️
 ```
-gcc -Wall -o main main.c draw.c chess_logic.c -lncursesw
+     _   _      _                      _    _             
+    | \ | |    | |                    | |  (_)            
+    |  \| | ___| |___      _____  _ __| | ___ _ __   __ _ 
+    | . ` |/ _ \ __\ \ /\ / / _ \| '__| |/ / | '_ \ / _` |
+    | |\  |  __/ |_ \ V  V / (_) | |  |   <| | | | | (_| |
+    \_| \_/\___|\__| \_/\_/ \___/|_|  |_|\_\_|_| |_|\__, |
+                                                     __/ |
+                                                    |___/ 
 ```
-- __"-lncursesw"__ links the wide-character ncurses library for Unicode chess symbols.
+  The server implements the multiplayer logic using TCP sockets and POSIX threads. It listens for 
+incoming connections, pairs two clients into a match, and creates a thread for each game 
+session. The server manages turn order, validates moves using the chess logic module, synchronizes 
+the board state between clients, and handles events such as check notifications, draw requests, player 
+disconnections and rematches. 🌐
+
+```
+     _____ _   _ _____ 
+    |  __ \ | | |_   _|
+    | |  \/ | | | | |  
+    | | __| | | | | |  
+    | |_\ \ |_| |_| |_ 
+     \____/\___/ \___/ 
+```
+
+The graphical interface of the game is implemented using the ncurses library, allowing the chessboard and 
+pieces to be rendered directly in the terminal. 🖥️
+
+The GUI module is responsible for:
+- drawing the chessboard grid
+- rendering chess pieces using Unicode chess symbols
+- handling keyboard input from the player
+- displaying feedback messages and game status
+- UTF-8 rendering for proper display of chess glyphs
+
+
+## How to play
+🚀 The game expects moves in the following format:
+  - The first two characters represent the starting square, and the last two characters represent the destination square.
+      - Columns: a-h
+      - Rows: 1–8
+        
+  - Moves must be provided in coordinate notation, without separators.
+      - _For example: a1a2 / b2h2_
+        
+- The provided **Makefile** automates compilation and linking of all modules, including the ncurses dependency required
+  for the terminal interface. Build the project with:
+
+      make
+- After compiling, start the server and connect two clients to begin a match.
+
   
 <img width="497" height="616" alt="image" src="https://github.com/user-attachments/assets/59e714d0-0830-4c49-863c-8f7e9727af67" />

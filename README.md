@@ -6,6 +6,7 @@
      \______  /___|  /\___  >____  >____  >  \______  (____  /__|_|  /\___  >
             \/     \/     \/     \/     \/          \/     \/      \/     \/ 
 ```
+Made in collaboration with Andor Marius and Raul Birza.
 
  This project implements a terminal-based multiplayer chess game written in C, featuring move validation, 
 game state tracking, and real-time gameplay over TCP sockets. The ncurses library is used to render the 
